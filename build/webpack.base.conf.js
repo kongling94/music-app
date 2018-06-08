@@ -40,6 +40,7 @@ module.exports = {
       'stylus': resolve('src/common/stylus'),
       'views': resolve('src/views'),
       'api': resolve('src/api'),
+      'base': resolve('src/views/base'),
 
     }
   },

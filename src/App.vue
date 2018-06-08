@@ -1,21 +1,24 @@
 <template>
   <div id="app">
     <!-- <img src="./assets/logo.png"> -->
-
-    <homeHeader></homeHeader>
+    <Header></Header>
     <tag></tag>
-    <router-view/>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
 <script>
-import homeHeader from 'views/home/home-header'
-import tag from 'views/home/tag'
+import Header from 'views/base/header'
+import Tag from 'views/base/tag'
+import Slider from 'views/base/slider'
 export default {
   name: 'App',
   components: {
-    homeHeader,
-    tag
+    Header,
+    Tag,
+    Slider
   }
 }
 </script>
