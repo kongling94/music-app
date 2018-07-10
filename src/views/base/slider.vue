@@ -1,59 +1,80 @@
 <template>
-  <div class="slider" v-if="sliderList">
-    <swiper :options="swiperOption" ref="mySwiper">
-      <!-- slides -->
-      <swiper-slide v-for="item in sliderList" :key="item.id">
-        <a :href="item.linkUrl">
-          <img :src="item.picUrl" alt="">
+  <div class="slider">
+    <div class="slider-group">
+      <div class="slider-item">
+        <a href="">
+          <img src=""
+               alt="">
         </a>
-      </swiper-slide>
-      <!-- Optional controls -->
-      <!-- <div class="swiper-pagination"  slot="pagination"></div> -->
-      <!-- <div class="swiper-button-prev" slot="button-prev"></div>
-      <div class="swiper-button-next" slot="button-next"></div> -->
-      <div class="swiper-scrollbar" slot="scrollbar"></div>
-    </swiper>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 // import 'swiper/dist/css/swiper.css'
-import { swiper, swiperSlide } from 'vue-awesome-swiper'
+// import { addClass } from 'js/dom'
 export default {
   name: 'slider',
-  props: ['sliderList'],
-  components: {
-    swiper,
-    swiperSlide
-  },
-  data () {
-    return {
-      swiperOption: {
-        autoplay: {delay: 1000},
-        loop: true,
-        scrollbar: {
-          el: '.swiper-scrollbar'
-        },
-        observer: true,
-        observeParents: true,
-        effect: 'fade'
-      }
+  props: {
+    loop: {
+      type: Boolean,
+      default: true
+    },
+    autoPlay: {
+      type: Boolean,
+      default: true
+    },
+    interval: {
+      type: Number,
+      default: 4000
     }
+  },
+  methods: {
+    _setSliderWidth () { },
+    _initSlider () { }
+  },
+  mounted () {
+
   }
 }
 </script>
 <style lang="stylus" scoped>
-@import '~stylus/variable';
-
-.slider >>> .swiper-slide
-  min-height 150px
-.slider >>> .swiper-scrollbar-drag
-  background-color rgba(255,205,50,0.8)
+@import '~stylus/variable'
 .slider
-  min-height: 1px
-  .swiper-slide
-    a
-      display block
-      img
-        height 100%
+  min-height 1px
+  .slider-group
+    position relative
+    overflow hidden
+    white-space nowrap
+    .slider-item
+      float left
+      box-sizing border-box
+      overflow hidden
+      text-align center
+      a
+        display block
         width 100%
+        overflow hidden
+        text-decoration none
+        img
+          display block
+          width 100%
+  .dots
+    position absolute
+    right 0
+    left 0
+    bottom 12px
+    text-align center
+    font-size 0
+    .dot
+      display inline-block
+      margin 0 4px
+      width 8px
+      height 8px
+      border-radius 50%
+      background $color-text-l
+      &.active
+        width 20px
+        border-radius 5px
+        background $color-text-ll
 </style>

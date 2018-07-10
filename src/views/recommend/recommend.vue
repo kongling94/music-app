@@ -1,24 +1,41 @@
 <template>
   <div class="recommend">
-   <div class="recommend-slider">
-     <slider :sliderList="sliderList"></slider>
-   </div>
-   <div class="recommend-content">
+    <div class="recommend-slider">
+      <div v-if="sliderList.length"
+           class="slider-wrapper"
+           ref="sliderWrapper">
+        <slider>
+          <div v-for="item in sliderList"
+               :key="item.id">
+            <a :href="item.linkUrl">
+              <img class="needsclick"
+                   :src="item.picUrl">
+            </a>
+          </div>
+        </slider>
+      </div>
+    </div>
+    <div class="recommend-content">
       <div class="list-title">热门推荐</div>
-     <div class="recommend-list">
-       <div class="item" v-for="list in songList" :key="list.id">
-         <div class="icon">
-           <router-link to="http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=2043041547">
-            <img :src="list.picUrl" alt="">
-           </router-link>
-         </div>
-         <div class="text">
-           <div class="desc" v-text="list.songListDesc"></div>
-           <div class="name" v-text="list.songListAuthor"></div>
-         </div>
-       </div>
-     </div>
-   </div>
+      <div class="recommend-list">
+        <div class="item"
+             v-for="list in songList"
+             :key="list.id">
+          <div class="icon">
+            <router-link to="http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=2043041547">
+              <img :src="list.picUrl"
+                   alt="">
+            </router-link>
+          </div>
+          <div class="text">
+            <div class="desc"
+                 v-text="list.songListDesc"></div>
+            <div class="name"
+                 v-text="list.songListAuthor"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -34,7 +51,6 @@ export default {
   },
   data () {
     return {
-      data: [],
       sliderList: [],
       songList: []
     }
@@ -56,59 +72,47 @@ export default {
 </script>
 <style lang="stylus" scoped>
 @import '~stylus/variable'
-
 .recommend
-  position absolute
+  position fixed
   width 100%
   top 88px
-  left 0
-  right 0
   bottom 0
-  .recommend-content
-    margin-top 10px
-    padding 0 10px
+  .recommend-content, .recommend-slider
     height 100%
-    // overflow hidden
-    // .slider-wrapper
-    //   position relative
-    //   width 100%
-    //   overflow hidden
-    .list-title
-      flex none
-      height 40px
-      line-height 40px
-      text-align center
-      font-size $font-size-medium
-      color $color-theme
+    overflow hidden
+    .slider-wrapper
+      position relative
+      width 100%
+      overflow hidden
     .recommend-list
-      // display flex
-      // flex-wrap wrap
+      .list-title
+        height 65px
+        line-height 65px
+        text-align center
+        font-size $font-size-medium
+        color $color-theme
       .item
-        width 50%
-        display inline-block
-        padding 20px
+        display flex
         box-sizing border-box
-        // align-items center
-        // padding 0 20px 20px 20px
+        align-items center
+        padding 0 20px 20px 20px
         .icon
-          width 100%
-          height 100%
-          img
-            width 100%
-            height 100%
+          flex 0 0 60px
+          width 60px
+          padding-right 20px
         .text
+          display flex
+          flex-direction column
+          justify-content center
+          flex 1
           line-height 20px
           overflow hidden
           font-size $font-size-medium
           .name
+            margin-bottom 10px
             color $color-text
           .desc
-            white-space nowrap
-            overflow hidden
-            text-overflow ellipsis
-            margin-top 5px
             color $color-text-d
-            margin-bottom 10px
     .loading-container
       position absolute
       width 100%
