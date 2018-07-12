@@ -2,8 +2,7 @@
   <div class="recommend">
     <div class="recommend-slider">
       <div v-if="sliderList.length"
-           class="slider-wrapper"
-           ref="sliderWrapper">
+           class="slider-wrapper">
         <slider>
           <div v-for="item in sliderList"
                :key="item.id">
@@ -73,33 +72,43 @@ export default {
 <style lang="stylus" scoped>
 @import '~stylus/variable'
 .recommend
-  position fixed
+  // position fixed
   width 100%
   top 88px
   bottom 0
   .recommend-content, .recommend-slider
     height 100%
     overflow hidden
+    padding 0 8px
     .slider-wrapper
       position relative
       width 100%
       overflow hidden
+    .list-title
+      height 65px
+      line-height 65px
+      text-align center
+      font-size $font-size-medium
+      color $color-theme
     .recommend-list
-      .list-title
-        height 65px
-        line-height 65px
-        text-align center
-        font-size $font-size-medium
-        color $color-theme
+      margin-right -8px
       .item
-        display flex
+        float left
+        width 50%
         box-sizing border-box
         align-items center
-        padding 0 20px 20px 20px
+        margin-bottom 10px
+        padding-right 8px
+        overflow hidden
         .icon
-          flex 0 0 60px
-          width 60px
-          padding-right 20px
+          // flex 0 0 60px
+          width 100%
+          // padding-right 20px
+          a
+            display block
+            width 100%
+            img
+              width 100%
         .text
           display flex
           flex-direction column

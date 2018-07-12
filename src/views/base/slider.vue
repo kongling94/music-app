@@ -1,18 +1,17 @@
 <template>
-  <div class="slider">
-    <div class="slider-group">
-      <div class="slider-item">
-        <a href="">
-          <img src=""
-               alt="">
-        </a>
-      </div>
+  <div class="slider" ref="slider">
+    <div class="slider-group" ref="sliderGroup">
+     <slot></slot>
+    </div>
+    <div class="dots">
+      <span class="dot" v-for="(item,index) in dots" :class="{ active:currentIndex === index}" :key="index"></span>
     </div>
   </div>
 </template>
 <script>
+import BScroll from 'better-scroll'
 // import 'swiper/dist/css/swiper.css'
-// import { addClass } from 'js/dom'
+import { addClass } from 'js/dom'
 export default {
   name: 'slider',
   props: {
@@ -29,19 +28,81 @@ export default {
       default: 4000
     }
   },
+  data () {
+    return {
+      dots: [],
+      currentIndex: 0
+    }
+  },
   methods: {
-    _setSliderWidth () { },
-    _initSlider () { }
+    _setSliderWidth () {
+      this.children = this.$refs.sliderGroup.children
+      let width = 0
+      let sliderWidth = this.$refs.slider.clientWidth
+      for (let i = 0; i < this.children.length; i++) {
+        let child = this.children[i]
+        addClass(child, 'slider-item')
+        child.style.width = sliderWidth + 'px'
+        width += sliderWidth
+      }
+      if (this.loop) {
+        width += 2 * sliderWidth
+      }
+      this.$refs.sliderGroup.style.width = width + 'px'
+    },
+    _initSlider () {
+      this.slider = new BScroll(this.$refs.slider, {
+        scrollX: true,
+        scrollY: false,
+        momentum: true,
+        snap: {
+          loop: this.loop,
+          threshold: 0.3,
+          speed: 400
+        },
+        click: true
+      })
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX
+        if (this.loop) {
+          pageIndex -= 1
+        }
+        this.currentIndex = pageIndex
+        if (this.autoPlay) {
+          clearTimeout(this.timer)
+          this._paly()
+        }
+      })
+    },
+    _dots () {
+      this.dots = new Array(this.children.length)
+    },
+    _paly () {
+      let pageIndex = this.currentIndex + 1
+      if (this.loop) {
+        pageIndex += 1
+      }
+      this.timer = setTimeout(() => {
+        this.slider.goToPage(pageIndex, 0, 400)
+      }, this.interval)
+    }
   },
   mounted () {
-
+    setTimeout(() => {
+      this._setSliderWidth()
+      this._dots()
+      this._initSlider()
+      if (this.autoPlay) {
+        this._paly()
+      }
+    }, 20)
   }
 }
 </script>
 <style lang="stylus" scoped>
 @import '~stylus/variable'
 .slider
-  min-height 1px
+  min-height: 1px
   .slider-group
     position relative
     overflow hidden
