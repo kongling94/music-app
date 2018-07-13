@@ -1,44 +1,49 @@
 <template>
   <div class="recommend">
-    <div class="recommend-slider">
-      <div v-if="sliderList.length"
-           class="slider-wrapper">
-        <slider>
-          <div v-for="item in sliderList"
-               :key="item.id">
-            <a :href="item.linkUrl">
-              <img class="needsclick"
-                   :src="item.picUrl">
-            </a>
+    <scroll :data="songList"
+            class="recommend-content">
+      <div>
+        <div class="recommend-slider">
+          <div v-if="sliderList.length"
+               class="slider-wrapper">
+            <slider>
+              <div v-for="item in sliderList"
+                   :key="item.id">
+                <a :href="item.linkUrl">
+                  <img class="needsclick"
+                       :src="item.picUrl">
+                </a>
+              </div>
+            </slider>
           </div>
-        </slider>
-      </div>
-    </div>
-    <div class="recommend-content">
-      <div class="list-title">热门推荐</div>
-      <div class="recommend-list">
-        <div class="item"
-             v-for="list in songList"
-             :key="list.id">
-          <div class="icon">
-            <router-link to="http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=2043041547">
-              <img :src="list.picUrl"
-                   alt="">
-            </router-link>
-          </div>
-          <div class="text">
-            <div class="desc"
-                 v-text="list.songListDesc"></div>
-            <div class="name"
-                 v-text="list.songListAuthor"></div>
+        </div>
+        <div class="recommend-content">
+          <div class="list-title">热门推荐</div>
+          <div class="recommend-list">
+            <div class="item"
+                 v-for="list in songList"
+                 :key="list.id">
+              <div class="icon">
+                <router-link to="http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=2043041547">
+                  <img :src="list.picUrl"
+                       alt="">
+                </router-link>
+              </div>
+              <div class="text">
+                <div class="desc"
+                     v-text="list.songListDesc"></div>
+                <div class="name"
+                     v-text="list.songListAuthor"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 <script>
-// import axios from 'axios'
+import scroll from 'base/scroll'
 import slider from 'base/slider'
 import { getRecommend } from 'api/recommend.js'
 import { ERR_OK } from 'api/config.js'
@@ -46,7 +51,8 @@ import { ERR_OK } from 'api/config.js'
 export default {
   name: 'recommend',
   components: {
-    slider
+    slider,
+    scroll
   },
   data () {
     return {
@@ -72,7 +78,7 @@ export default {
 <style lang="stylus" scoped>
 @import '~stylus/variable'
 .recommend
-  // position fixed
+  position fixed
   width 100%
   top 88px
   bottom 0
