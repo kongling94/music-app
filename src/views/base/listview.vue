@@ -1,6 +1,9 @@
 <template>
   <scroll class="listview"
           :data="data"
+          :probeType="probeType"
+          :listenScroll="listenScroll"
+          @scroll="scroll"
           ref="scrollListview">
     <ul>
       <li v-for="group in data"
@@ -13,6 +16,7 @@
         <ul>
           <li v-for="item in group.items"
               :key="item.id"
+              @click="selectItem(item)"
               class="list-group-item">
             <img :src="item.avatar"
                  class="avatar">
@@ -27,21 +31,25 @@
       <ul>
         <li v-for="(item,index) in shortcutList"
             :key="index"
+            :class="{'current':currentIndex === index}"
             :data-index="index"
             class="item">
           {{item}}
         </li>
       </ul>
     </div>
+    <div class="list-fixed"
+         v-show="fixedTitle"
+         ref="fixedTop">
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
   </scroll>
 </template>
 <script>
 import Scroll from 'base/scroll'
+// import loading from 'base/loading'
 import { getData } from 'common/js/dom.js'
 export default {
-  created () {
-    this.touch = {}
-  },
   name: 'listview',
   props: {
     data: {
@@ -49,17 +57,40 @@ export default {
       default: () => []
     }
   },
+  data () {
+    return {
+      scrollY: -1,
+      currentIndex: 0,
+      diff: -1
+    }
+  },
   components: {
     Scroll
+  },
+  created () {
+    this.touch = {}
+    this.listenScroll = true
+    this.listHeight = []
+    this.probeType = 3
   },
   computed: {
     shortcutList () {
       return this.data.map((group) => {
         return group.title.substr(0, 1)
       })
+    },
+    fixedTitle () {
+      if (this.scrollY > 0) {
+        return ''
+      }
+      return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
     }
   },
   methods: {
+    selectItem (item) {
+      this.$emit('select', item)
+    },
+    // 点击滚动
     onShortcutTouchStart (e) {
       let targetIndex = parseInt(getData(e.target, 'index'))
       let touchStart = e.touches[0]
@@ -67,6 +98,7 @@ export default {
       this.touch.elementIndex = targetIndex
       this._scrollTo(targetIndex)
     },
+    // 侧边滚动
     onShortcutTouchMove (e) {
       let touchStart = e.touches[0]
       this.touch.y2 = touchStart.pageY
@@ -75,8 +107,64 @@ export default {
       // console.log(targetIndex)
       this._scrollTo(targetIndex)
     },
+    scroll (pos) {
+      this.scrollY = pos.y
+    },
     _scrollTo (index) {
+      if (!index && index !== 0) {
+        return
+      }
+      if (index < 0) {
+        index = 0
+      } else if (index > this.listHeight.length - 2) {
+        index = this.listHeight.length - 2
+      }
+      this.scrollY = -this.listHeight[index]
       this.$refs.scrollListview.scrollToElement(this.$refs.listGroup[index], 0)
+    },
+    // 计算滚动列表的高度
+    _calculateHeight () {
+      this.listHeight = []
+      const list = this.$refs.listGroup
+      let height = 0
+      this.listHeight.push(height)
+      for (let i = 0; i < list.length; i++) {
+        const element = list[i]
+        height += element.clientHeight
+        this.listHeight.push(height)
+      }
+    }
+  },
+  watch: {
+    data () {
+      setTimeout(() => {
+        this._calculateHeight()
+      }, 20)
+    },
+    scrollY (newY) {
+      const listHeight = this.listHeight
+      if (newY > 0) {
+        this.currentIndex = 0
+        return
+      }
+      for (let i = 0; i < listHeight.length - 1; i++) {
+        let element1 = listHeight[i]
+        let element2 = listHeight[i + 1]
+        if (-newY >= element1 && -newY < element2) {
+          this.currentIndex = i
+          this.diff = element2 + newY
+          return
+        }
+        this.currentIndex = listHeight.length - 2
+      }
+    },
+    diff (newVal) {
+      let fixedTop = (newVal > 0 && newVal < 30) ? newVal - 30 : 0
+      if (this.fixedTop === fixedTop) {
+        return
+      }
+      this.fixedTop = fixedTop
+      this.$refs.fixedTop.style.transform = `translate3d(0,${fixedTop}px,0)`
     }
   }
 }
@@ -98,7 +186,7 @@ export default {
       text-align left
       font-size $font-size-small
       color $color-theme
-      background $color-hightlight-background
+      background $color-highlight-background
     .list-group-item
       display flex
       align-items center
@@ -140,8 +228,9 @@ export default {
       line-height 30px
       padding-left 20px
       font-size $font-size-small
-      color $color-text-l
+      color $color-theme
       background $color-highlight-background
+      transition all 0.3s ease-in-out
   .loading-container
     position absolute
     width 100%
