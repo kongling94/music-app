@@ -3,7 +3,7 @@ import Vue from 'vue'
 import * as actions from './actions'
 import * as getters from './getters'
 import state from './state'
-import mutation from './mutation'
+import mutations from './mutations'
 import createdLogger from 'vuex/dist/logger'
 Vue.use(Vuex)
 
@@ -12,7 +12,7 @@ const debug = process.env.NODE_ENV !== 'production'
 
 export default new Vuex.Store({
   state,
-  mutation,
+  mutations,
   actions,
   getters,
   // 开启严格模式

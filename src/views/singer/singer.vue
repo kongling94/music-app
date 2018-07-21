@@ -32,7 +32,6 @@ export default {
         path: `/singer/${item.id}`
       })
       this.setSinger(item)
-      console.log(item)
     },
     _getSingerList () {
       getSingerList().then((res) => {
@@ -98,6 +97,7 @@ export default {
     }
   },
   created () {
+    console.log('wo de ')
     this._getSingerList()
   }
 }
