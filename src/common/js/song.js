@@ -1,6 +1,7 @@
 /* import { getLyric } from 'api/song'
 import { ERR_OK } from 'api/config'
 import { Base64 } from 'js-base64' */
+import { guidNum } from 'api/singer'
 
 // ES6 class 创建一个song的类
 export default class Song {
@@ -33,7 +34,7 @@ export default class Song {
   } */
 }
 
-export function createSong (musicData, obj) {
+export function createSong (musicData) {
   return new Song({
     id: musicData.songid,
     mid: musicData.songmid,
@@ -43,15 +44,12 @@ export function createSong (musicData, obj) {
     album: musicData.albumname,
     // 歌曲时长
     duration: musicData.interval,
-    more: obj
-    // image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
-    //   musicData.albummid
-    // }.jpg?max_age=2592000`
-    // //   url: `http://dl.stream.qqmusic.qq.com/C400${musicData.songmid}.m4a?vkey=${
-    // //     itesm.vkey
-    // //   }&guid=647988300&uin=0&fromtag=66 http://dl.stream.qqmusic.qq.com/${
-    // //     musicData.songid
-    // //   }.m4a?fromtag=46`
+    image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
+      musicData.albummid
+    }.jpg?max_age=2592000`,
+    url: `http://dl.stream.qqmusic.qq.com/${musicData.filename}?vkey=${
+      musicData.vkey
+    }&guid=${guidNum}&uin=0&fromtag=66`
   })
 }
 

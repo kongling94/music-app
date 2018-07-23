@@ -30,6 +30,7 @@ export function getSingerDetail (id) {
   })
   return jsonp(url, data, options)
 }
+
 export function getSongVkey (mid) {
   const url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg?'
   const data = Object.assign({}, commonParams, {
@@ -40,15 +41,37 @@ export function getSongVkey (mid) {
     hostUin: 0,
     loginUin: 0,
     needNewCode: 0,
-    guid: _guid(),
-    jsonpCallback: 'MusicJsonCallback5827673999447271'
+    guid: guidNum,
+    jsonpCallback: 'MusicJsonCallback898829490820267',
+    callback: 'MusicJsonCallback898829490820267'
   })
   return jsonp(url, data)
 }
 
-function _guid () {
+export function _guid () {
   let random = parseInt(Math.random() * 2147483647)
-  let time = parseInt(new Date().getTime() * 1000)
-  let reslut = (random * time) % 10000000000
-  return reslut
+  let time = parseInt(new Date().getUTCMilliseconds())
+  let result = (random * time) % 1e10
+  // let t = new Date().getUTCMilliseconds()
+  // return (Math.round(2147483647 * Math.random()) * t) % 1e10
+  return result
 }
+
+export const guidNum = _guid()
+
+// QQ音乐官方的Guid方法
+
+/* function _getGuid () {
+  if (_guid.length > 0) return _guid
+  var e = MUSIC.cookie.get('pgv_pvid')
+  if (e && e.length > 0) return (_guid = e)
+  var t = new Date().getUTCMilliseconds()
+  return (
+    (_guid = (Math.round(2147483647 * Math.random()) * t) % 1e10),
+    (document.cookie =
+      'pgv_pvid=' +
+      _guid +
+      '; Expires=Sun, 18 Jan 2038 00:00:00 GMT; PATH=/; DOMAIN=qq.com;'),
+    _guid
+  )
+} */

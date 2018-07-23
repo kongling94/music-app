@@ -97,7 +97,6 @@ export default {
     }
   },
   created () {
-    console.log('wo de ')
     this._getSingerList()
   }
 }
