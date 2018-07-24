@@ -2,10 +2,13 @@
   <div class="song-list">
     <ul>
       <li class="item"
-          v-for=" song in songs"
-          :key="song.id">
+          v-for=" (song,index) in songs"
+          :key="song.id"
+          @click="selectItem(song,index)">
         <div class="rank">
-          <div class="icon"></div>
+          <div class="icon"
+               :style="bgStyle(song.image)">
+          </div>
           <div class="text"></div>
         </div>
         <div class="content">
@@ -31,10 +34,19 @@ export default {
   methods: {
     getDesc (song) {
       return `${song.singer} · ${song.album}`
+    },
+    bgStyle (img) {
+      return `background-image: url(${img})`
+    },
+    selectItem (item, index) {
+      this.$emit('select', item, index)
     }
   },
+  computed: {
+
+  },
   mounted () {
-    // console.log(this.songs)
+
   }
 }
 </script>
@@ -56,9 +68,9 @@ export default {
       text-align center
       .icon
         display inline-block
-        width 25px
-        height 24px
-        background-size 25px 24px
+        width 50px
+        height 48px
+        background-size 50px 48px
         &.icon0
           bg-image('first')
         &.icon1

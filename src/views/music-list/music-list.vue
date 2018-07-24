@@ -1,6 +1,7 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back"
+         @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title"
@@ -8,7 +9,16 @@
     <div class="bg-image"
          :style="bgStyle"
          ref="bgImage">
-      <div class="filter"></div>
+      <div class="play-wrapper">
+        <div class="play"
+             v-show="songs.length>0"
+             ref="playBtn">
+          <i class="icon-play"></i>
+          <span class="text">随机播放歌曲</span>
+        </div>
+      </div>
+      <div class="filter"
+           ref="filter"></div>
     </div>
     <div class="bg-layer"
          ref="layer"></div>
@@ -19,7 +29,8 @@
             :listen-scroll="listenScroll"
             @scroll="scroll">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs"
+                   @select="select"></song-list>
       </div>
     </scroll>
   </div>
@@ -27,6 +38,7 @@
 <script>
 import songList from 'base/song-list'
 import scroll from 'base/scroll'
+import { mapActions } from 'vuex'
 export default {
   name: 'music-list',
   props: {
@@ -62,7 +74,19 @@ export default {
   methods: {
     scroll (pos) {
       this.scrollY = pos.y
-    }
+    },
+    back () {
+      this.$router.back()
+    },
+    select (item, index) {
+      this.selectPlay({
+        list: this.songs,
+        index
+      })
+    },
+    ...mapActions([
+      'selectPlay'
+    ])
   },
   watch: {
     scrollY (newY) {
@@ -70,20 +94,22 @@ export default {
       let zindex = 0
       let scale = 1
       const precent = Math.abs(newY / this.imageHeight)
-      console.log(precent)
+
       if (newY > 0) {
         scale = 1 + precent
         zindex = 10
       }
-
+      // this.$refs.filters.style['backdrop-filter'] = `blur(${blur}px)`
       this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
       if (newY < this.minTranslateY) {
         zindex = 10
         this.$refs.bgImage.style.paddingTop = 0
         this.$refs.bgImage.style.height = 40 + 'px'
+        this.$refs.playBtn.style.display = 'none'
       } else {
         this.$refs.bgImage.style.paddingTop = '70%'
         this.$refs.bgImage.style.height = 0
+        this.$refs.playBtn.style.display = ''
       }
       this.$refs.bgImage.style.zIndex = zindex
       this.$refs.bgImage.style['transform'] = `scale(${scale})`
