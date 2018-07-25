@@ -7,7 +7,8 @@
                 @leave="leave"
                 @after-leave="afterLeave">
       <div class="normal-player"
-           v-show="fullScreen">
+           v-show="fullScreen"
+           ref="normalPlayer">
         <div class="background">
           <img :src="currentSong.image"
                width="100%"
@@ -27,8 +28,10 @@
         </div>
         <div class="middle">
           <div class="middle-l">
-            <div class="cd-wrapper">
-              <div class="cd">
+            <div class="cd-wrapper"
+                 ref="cdWrapper">
+              <div class="cd"
+                   :class="cdCls">
                 <img :src="currentSong.image"
                      class="image"
                      alt="">
@@ -37,18 +40,36 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">
+              {{formatTime(currentTime)}}
+            </span>
+            <div class="progress-bar-wrapper">
+              <progressBar :percent="percent"
+                           @percentPos="newPercentChange"></progressBar>
+            </div>
+            <span class="time time-r">
+              {{formatTime(currentSong.duration)}}
+            </span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-prev"></i>
+            <div class="icon i-left"
+                 :class="disableCls">
+              <i class="icon-prev"
+                 @click="prev"></i>
             </div>
-            <div class="icon i-center">
-              <i class="icon-play"></i>
+            <div class="icon i-center"
+                 :class="disableCls">
+              <i :class="playIcon"
+                 @click="togglePlay"></i>
             </div>
-            <div class="icon i-right">
-              <i class="icon-next"></i>
+            <div class="icon i-right"
+                 :class="disableCls">
+              <i class="icon-next"
+                 @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-not-favorite"></i>
@@ -60,12 +81,14 @@
     <transition name="mini">
       <div class="mini-player"
            v-show="!fullScreen"
-           @click="showNormalPlayer">
+           @click.stop="showNormalPlayer"
+           ref="miniPlayer">
         <div class="icon">
           <img :src="currentSong.image"
                width="40"
                height="40"
-               alt="">
+               alt=""
+               :class="cdCls">
         </div>
         <div class="text">
           <h2 class="name"
@@ -73,29 +96,67 @@
           <p class="desc"
              v-html="currentSong.singer"></p>
         </div>
-        <div class="control"></div>
+        <div class="control">
+          <i :class="miniPlayIcon"
+             @click.stop="togglePlay"></i>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio ref="audio"
+           :src="currentSong.url"
+           @canplay="ready"
+           @timeupdate="updateTime"></audio>
   </div>
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex'
-import animation from 'create-keyframe-animation'
+import animations from 'create-keyframe-animation'
+import { prefixStyle } from 'common/js/dom'
+import progressBar from './progress-bar'
+const transform = prefixStyle('transform')
 export default {
   name: 'player',
+  data () {
+    return {
+      songReady: false,
+      currentTime: 0
+    }
+  },
+  components: {
+    progressBar
+  },
   computed: {
+    playIcon () {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    miniPlayIcon () {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    cdCls () {
+      return this.playing ? 'play' : 'play pause'
+    },
+    disableCls () {
+      return this.songReady ? '' : 'disable'
+    },
+    percent () {
+      return this.currentTime / this.currentSong.duration
+    },
     ...mapGetters([
       'fullScreen',
       'playList',
-      'currentSong'
+      'currentSong',
+      'playing',
+      'currentIndex'
     ])
   },
   methods: {
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlaying: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
     }),
     hideNormalPlayer () {
       this.setFullScreen(false)
@@ -103,17 +164,142 @@ export default {
     showNormalPlayer () {
       this.setFullScreen(true)
     },
-    enter (el, done) {
-
+    newPercentChange (percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      if (!this.playing) {
+        this.togglePlay()
+      }
     },
+    enter (el, done) {
+      // 解构赋值
+      const { x, y, scale } = this._getPosAndScale()
+      // 定义动画帧
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0,0,0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0,0,0) scale(1)`
+        }
+      }
+      // 定义动画名称和运动曲线
+      animations.registerAnimation({
+        name: 'move',
+        animation,
+        presets: {
+          duration: 400,
+          easing: 'linear'
+        }
+      })
+      // 给组件注册动画
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+    },
+    // 动画结束后
     afterEnter () {
-
+      // 取消注册
+      animations.unregisterAnimation('move')
+      // DOM元素上将animation置空
+      this.$refs.cdWrapper.style.animation = ''
     },
     leave (el, done) {
-
+      this.$refs.cdWrapper.style.transition = 'all 0.4s'
+      const { x, y, scale } = this._getPosAndScale()
+      this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+      this.$refs.cdWrapper.addEventListener('transitionend', done)
     },
     afterLeave () {
-
+      this.$refs.cdWrapper.style.animation = ''
+      this.$refs.cdWrapper.style[transform] = ''
+    },
+    // CD封面位移的计算
+    _getPosAndScale () {
+      // 目标宽度
+      let targetWidth = 40
+      // 左侧偏移
+      let paddingLeft = 40
+      // 底部偏移
+      let targetBottom = 30
+      // 动画结束后相对于顶部偏移
+      let paddingTop = 80
+      // 动画结束后的width
+      let width = window.innerWidth * 0.8
+      // 比例计算
+      const scale = targetWidth / width
+      // x轴：因为是从左到右移动，起始位置小于结束位置 前面加负号
+      const x = -(window.innerWidth / 2 - paddingLeft)
+      // y轴：因为是从下到上，正值
+      const y = window.innerHeight - paddingTop - width / 2 - targetBottom
+      return { x, y, scale }
+    },
+    togglePlay () {
+      this.setPlaying(!this.playing)
+    },
+    prev () {
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex - 1
+      if (index === -1) {
+        index = this.playList.length - 1
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlay()
+      }
+      this.songReady = false
+    },
+    next () {
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex + 1
+      if (index === this.playList.length) {
+        index = 0
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlay()
+      }
+      this.songReady = false
+    },
+    ready () {
+      this.songReady = true
+    },
+    error () {
+      this.songReady = true
+    },
+    updateTime (e) {
+      this.currentTime = e.target.currentTime
+    },
+    formatTime (interval) {
+      interval = interval | 0
+      const minute = interval / 60 | 0
+      const second = this._pad(interval % 60)
+      return `${minute}:${second}`
+    },
+    _pad (num, n = 2) {
+      let len = num.toString().length
+      while (len < n) {
+        num = '0' + num
+        len++
+      }
+      return num
+    }
+  },
+  watch: {
+    currentSong () {
+      this.$nextTick(() => {
+        this.$refs.audio.play()
+      })
+    },
+    playing (newPlaying) {
+      this.$nextTick(() => {
+        const audio = this.$refs.audio
+        newPlaying ? audio.play() : audio.pause()
+      })
     }
   }
 }
@@ -121,6 +307,8 @@ export default {
 <style lang="stylus" scoped>
 @import '~common/stylus/variable'
 @import '~common/stylus/mixin'
+*
+  touch-action none
 .player
   .normal-player
     position fixed
@@ -137,7 +325,7 @@ export default {
       width 100%
       height 100%
       z-index -1
-      opacity 0.6
+      opacity 0.8
       filter blur(20px)
     .top
       position relative
