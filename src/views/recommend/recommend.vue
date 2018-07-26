@@ -24,10 +24,10 @@
                  v-for="list in songList"
                  :key="list.id">
               <div class="icon">
-                <router-link to="http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=2043041547">
+                <a :href="`http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=${list.accessnum}&id=${list.id}`">
                   <img :src="list.picUrl"
                        alt="">
-                </router-link>
+                </a>
               </div>
               <div class="text">
                 <div class="desc"

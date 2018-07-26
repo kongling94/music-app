@@ -1,3 +1,4 @@
+// Vuex中为了避免直接对state的操作，使用getter进行代理
 export const singer = state => state.singer
 export const playing = state => state.playing
 export const fullScreen = state => state.fullScreen

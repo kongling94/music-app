@@ -1,5 +1,5 @@
-import { commonParams } from './config'
 import axios from 'axios'
+import { commonParams } from './config.js'
 
 export function getLyric (mid) {
   const url = '/api/lyric'
@@ -9,9 +9,10 @@ export function getLyric (mid) {
     platform: 'yqq',
     hostUin: 0,
     needNewCode: 0,
-    categoryId: 10000000,
     pcachetime: +new Date(),
-    format: 'json'
+    format: 'jsonp',
+    jsonpCallback: 'MusicJsonCallback_lrc',
+    callback: 'MusicJsonCallback_lrc'
   })
 
   return axios

@@ -1,4 +1,5 @@
 import * as types from './mutation-type'
+// Vuex中操作state的数据一般使用mutation代理操作
 const mutations = {
   // 设置SET_SINGER方法
   [types.SET_SINGER] (state, singer) {

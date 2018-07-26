@@ -61,7 +61,9 @@ export default {
       this.$emit('percentPos', percent)
     },
     changeProgressPos (e) {
-      this._offset(e.offsetX)
+      const rect = this.$refs.progressBar.getBoundingClientRect()
+      const offsetWidth = e.pageX - rect.left
+      this._offset(offsetWidth)
       this.trigerPos()
     },
     _offset (x) {
