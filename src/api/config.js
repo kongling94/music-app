@@ -4,7 +4,8 @@ export const commonParams = {
   format: 'jsonp',
   inCharset: 'utf-8',
   outCharset: 'utf-8',
-  notice: 0
+  notice: 0,
+  platform: 'yqq'
 }
 
 export const options = {

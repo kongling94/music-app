@@ -75,6 +75,38 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           .catch(e => {
             console.log(e)
           })
+      }),
+      app.get('/api/disc', function (req, res) {
+        var url =
+            'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+        axios
+          .get(url, {
+            headers: {
+              referer: 'https://c.y.qq.com/',
+              host: 'c.y.qq.com'
+            },
+            params: req.query
+          })
+          .then(response => {
+            var data = response.data
+            if (typeof data === 'string') {
+              var pattern = /^\w+\(()/
+              var ndata = data.replace(data.match(pattern)[0], '')
+              data = JSON.parse(ndata.replace(/\)$/, ''))
+            }
+            /*  if (typeof data === 'string') {
+              var reg = /^\w+\(({[^()]+})\)$/
+              var result = data.match(reg)
+              if (result) {
+                data = JSON.parse(result[1])
+              }
+            } */
+            // data = JSON.parse(regData)
+            res.json(data)
+          })
+          .catch(e => {
+            console.log(e)
+          })
       })
     }
   },

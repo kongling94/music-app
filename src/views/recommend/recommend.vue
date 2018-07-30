@@ -22,12 +22,14 @@
           <div class="recommend-list">
             <div class="item"
                  v-for="list in songList"
-                 :key="list.id">
+                 :key="list.id"
+                 @click="_getDisc(list.id)">
               <div class="icon">
-                <a :href="`http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=${list.accessnum}&id=${list.id}`">
+                <!-- 如果使用a标签的href跳转 :href="`http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=${list.accessnum}&id=${list.id}`" -->
+                <div>
                   <img :src="list.picUrl"
                        alt="">
-                </a>
+                </div>
               </div>
               <div class="text">
                 <div class="desc"
@@ -40,6 +42,7 @@
         </div>
       </div>
     </scroll>
+    <router-view></router-view>
   </div>
 </template>
 <script>
@@ -47,7 +50,8 @@ import scroll from 'base/scroll'
 import slider from 'base/slider'
 import { getRecommend } from 'api/recommend.js'
 import { ERR_OK } from 'api/config.js'
-
+import { mapMutations } from 'vuex'
+import { getDisc } from 'api/disc.js'
 export default {
   name: 'recommend',
   components: {
@@ -57,10 +61,14 @@ export default {
   data () {
     return {
       sliderList: [],
-      songList: []
+      songList: [],
+      discList: []
     }
   },
   methods: {
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    }),
     _getRecommend () {
       getRecommend().then((res) => {
         if (res.code === ERR_OK) {
@@ -68,9 +76,25 @@ export default {
           this.songList = res.data.songList
         }
       })
+    },
+    _getDisc (id) {
+      getDisc(id).then((res) => {
+        if (res.code === ERR_OK) {
+          this.discList = res.cdlist
+          console.log(this.discList)
+        }
+      })
+    },
+    selectItem (item) {
+      this.$router.push({
+        path: `/recommed/${item.id}`
+      })
+      // 利用Vuex来统一管理歌单的数据
+      this.setDisc(item)
     }
   },
   created () {
+    this._getDisc()
     this._getRecommend()
   }
 }
@@ -110,7 +134,7 @@ export default {
           // flex 0 0 60px
           width 100%
           // padding-right 20px
-          a
+          div
             display block
             width 100%
             img
