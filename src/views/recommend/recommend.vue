@@ -23,7 +23,7 @@
             <div class="item"
                  v-for="list in songList"
                  :key="list.id"
-                 @click="_getDisc(list.id)">
+                 @click="selectItem(list)">
               <div class="icon">
                 <!-- 如果使用a标签的href跳转 :href="`http://y.qq.com/w/taoge.html?ADTAG=myqq&from=myqq&channel=${list.accessnum}&id=${list.id}`" -->
                 <div>
@@ -41,6 +41,10 @@
           </div>
         </div>
       </div>
+      <!-- <div class="loading-container"
+           v-show="!songList.length">
+        <loading></loading>
+      </div> -->
     </scroll>
     <router-view></router-view>
   </div>
@@ -48,6 +52,7 @@
 <script>
 import scroll from 'base/scroll'
 import slider from 'base/slider'
+import loading from 'base/loading'
 import { getRecommend } from 'api/recommend.js'
 import { ERR_OK } from 'api/config.js'
 import { mapMutations } from 'vuex'
@@ -56,7 +61,8 @@ export default {
   name: 'recommend',
   components: {
     slider,
-    scroll
+    scroll,
+    loading
   },
   data () {
     return {
@@ -80,21 +86,19 @@ export default {
     _getDisc (id) {
       getDisc(id).then((res) => {
         if (res.code === ERR_OK) {
-          this.discList = res.cdlist
-          console.log(this.discList)
+          this.discList = res.cdlist[0]
+          this.setDisc(this.discList)
         }
       })
     },
     selectItem (item) {
+      this._getDisc(item.id)
       this.$router.push({
         path: `/recommed/${item.id}`
       })
-      // 利用Vuex来统一管理歌单的数据
-      this.setDisc(item)
     }
   },
   created () {
-    this._getDisc()
     this._getRecommend()
   }
 }
