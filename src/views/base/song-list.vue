@@ -2,14 +2,13 @@
   <div class="song-list">
     <ul>
       <li class="item"
-          v-for=" (song,index) in songs"
+          v-for="(song,index) in songs"
           :key="song.id"
           @click="selectItem(song,index)">
-        <div class="rank">
-          <div class="icon"
-               :style="bgStyle(song.image)">
-          </div>
-          <div class="text"></div>
+        <div class="rank"
+             v-show="rank">
+          <span :class="getRankCls(index)"
+                v-text="getRankText(index)"></span>
         </div>
         <div class="content">
           <h2 class="name">{{song.name}}</h2>
@@ -23,14 +22,9 @@
 
 export default {
   name: 'song-list',
-  props: {
-    songs: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    }
-  },
+  props: [
+    'songs', 'rank'
+  ],
   methods: {
     getDesc (song) {
       return `${song.singer} · ${song.album}`
@@ -40,6 +34,18 @@ export default {
     },
     selectItem (item, index) {
       this.$emit('select', item, index)
+    },
+    getRankCls (index) {
+      if (index < 3) {
+        return `icon icon${index}`
+      } else {
+        return `text`
+      }
+    },
+    getRankText (index) {
+      if (index > 2) {
+        return index + 1
+      }
     }
   },
   computed: {
@@ -53,7 +59,7 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~stylus/variable'
-// @import '~stylus/mixin'
+@import '~stylus/mixin'
 .song-list
   .item
     display flex
@@ -68,9 +74,9 @@ export default {
       text-align center
       .icon
         display inline-block
-        width 50px
-        height 48px
-        background-size 50px 48px
+        width 40px
+        height 38px
+        background-size 40px 38px
         &.icon0
           bg-image('first')
         &.icon1

@@ -65,7 +65,6 @@ export default {
           })
         }
       })
-      console.log(ret)
       return ret
     }
   }

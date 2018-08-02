@@ -17,7 +17,6 @@ export default {
       default: true
     },
     data: {
-      type: Array,
       default: null
     },
     listenScroll: {

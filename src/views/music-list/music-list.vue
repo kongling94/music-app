@@ -31,6 +31,7 @@
             @scroll="scroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"
+                   :rank="rank"
                    @select="select"></song-list>
       </div>
     </scroll>
@@ -42,22 +43,7 @@ import scroll from 'base/scroll'
 import { mapActions } from 'vuex'
 export default {
   name: 'music-list',
-  props: {
-    bgImage: {
-      type: String,
-      default: ''
-    },
-    songs: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    },
-    title: {
-      type: String,
-      default: ''
-    }
-  },
+  props: ['bgImage', 'songs', 'title', 'rank'],
   data () {
     return {
       scrollY: 0

@@ -41,10 +41,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="loading-container"
-           v-show="!songList.length">
-        <loading></loading>
-      </div> -->
     </scroll>
     <router-view></router-view>
   </div>
@@ -52,7 +48,6 @@
 <script>
 import scroll from 'base/scroll'
 import slider from 'base/slider'
-import loading from 'base/loading'
 import { getRecommend } from 'api/recommend.js'
 import { ERR_OK } from 'api/config.js'
 import { mapMutations } from 'vuex'
@@ -61,8 +56,7 @@ export default {
   name: 'recommend',
   components: {
     slider,
-    scroll,
-    loading
+    scroll
   },
   data () {
     return {
@@ -94,11 +88,13 @@ export default {
     selectItem (item) {
       this._getDisc(item.id)
       this.$router.push({
-        path: `/recommed/${item.id}`
+        path: `/recommend/${item.id}`
       })
+      // 利用Vuex来统一管理歌单的数据
     }
   },
   created () {
+    this._getDisc()
     this._getRecommend()
   }
 }
