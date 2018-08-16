@@ -23,7 +23,10 @@ export default {
     Slider,
     Player
   }
-}
+},
+created() {
+  console.log('git OK?')
+},
 </script>
 
 <style lang="stylus" scoped>
