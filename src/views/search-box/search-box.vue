@@ -24,12 +24,18 @@ export default {
     }
   },
   methods: {
+    // 清空输入框
     clear () {
       this.query = ''
+    },
+    setQuery (item) {
+      this.query = item
     }
   },
   created () {
+    // 生命周期钩子
     this.$watch('query', (newQuery) => {
+      // 向父组件触发query事件
       this.$emit('query', newQuery)
     })
   }

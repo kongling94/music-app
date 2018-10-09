@@ -4,7 +4,7 @@
     <Header></Header>
     <tag></tag>
     <keep-alive>
-      <router-view/>
+      <router-view />
     </keep-alive>
     <Player></Player>
   </div>
@@ -23,10 +23,7 @@ export default {
     Slider,
     Player
   }
-},
-created() {
-  console.log('git OK?')
-},
+}
 </script>
 
 <style lang="stylus" scoped>
