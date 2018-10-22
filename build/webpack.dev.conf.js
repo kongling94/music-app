@@ -51,6 +51,29 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       poll: config.dev.poll
     },
     before (app) {
+      app.get('/api/SearchList', function (req, res) {
+        var url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+        axios
+          .get(url, {
+            headers: {
+              referer: 'https://c.y.qq.com/',
+              host: 'c.y.qq.com'
+            },
+            params: req.query
+          })
+          .then(response => {
+            var data = response.data
+            if (typeof data === 'string') {
+              var pattern = /^\w+\(()/
+              var ndata = data.replace(data.match(pattern)[0], '')
+              data = JSON.parse(ndata.replace(/\)$/, ''))
+            }
+            res.json(data)
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      }),
       app.get('/api/lyric', function (req, res) {
         var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
         axios
