@@ -1,25 +1,37 @@
 <template>
-  <div class="suggest">
-    <ul class="suggest-list">
-      <li class="suggest-item"
-          v-for="item in result"
-          :key="item.id">
-        <div class="icon">
-          <i :class="getIconCls(item)"></i>
-        </div>
-        <div class="name">
-          <p class="text"
-             v-html="getDisplayName(item)"></p>
-        </div>
-      </li>
-    </ul>
+  <div>
+    <Scroll class="suggest"
+            :data="result"
+            :pullup="pullup"
+            @scrollToEnd="getMoreInfo"
+            ref="suggest">
+      <ul class="suggest-list">
+        <li class="suggest-item"
+            v-for="item in result"
+            :key="item.id"
+            @click="selectItem(item)">
+          <div class="icon">
+            <i :class="getIconCls(item)"></i>
+          </div>
+          <div class="name">
+            <p class="text"
+               v-html="getDisplayName(item)"></p>
+          </div>
+        </li>
+      </ul>
+    </Scroll>
   </div>
 </template>
 <script>
 import { getSearchList } from 'api/search'
+import { getSongVkey } from 'api/singer.js'
 import { ERR_OK } from 'api/config'
+import Scroll from 'base/scroll'
 import { createSong } from 'common/js/song'
+import Singer from 'common/js/singer'
+import { mapMutations, mapActions } from 'vuex'
 const TYPE_SINGER = 'singer'
+const PERPAGE = 20
 export default {
   props: {
     query: {
@@ -31,18 +43,40 @@ export default {
       default: true
     }
   },
+  components: {
+    Scroll
+  },
   data () {
     return {
       page: 1,
-      result: []
+      result: [],
+      pullup: true,
+      hasMore: true
     }
   },
   methods: {
-    search () {
-      getSearchList(this.query, this.page, this.showSinger).then((res) => {
+    getMoreInfo () {
+      if (!this.hasMore) {
+        return
+      }
+      this.page++
+      this.search(this.query, this.page, this.showSinger, PERPAGE).then((res) => {
         if (res.code === ERR_OK) {
+          this.result = this.result.concat(this._formatReslut(res.data))
+          this._checkMore(res.data)
+        }
+      })
+    },
+    search () {
+      this.hasMore = true
+      this.page = 1
+      this.$refs.suggest.scrollTo(0, 0)
+      getSearchList(this.query, this.page, this.showSinger, PERPAGE).then((res) => {
+        if (res.code === ERR_OK) {
+          // console.log(res.data)
           this.result = this._formatReslut(res.data)
-          // console.log(this.result)
+          console.log(this.result)
+          this._checkMore(res.data)
         }
       })
     },
@@ -60,6 +94,26 @@ export default {
         return `${item.name}-${item.singer}`
       }
     },
+    selectItem (item) {
+      if (item.type === TYPE_SINGER) {
+        const singer = new Singer({
+          id: item.singermid,
+          name: item.singername
+        })
+        this.$router.push({
+          path: `/search/${singer.id}`
+        })
+        this.setSinger(singer)
+      } else {
+        this.insertSong(item)
+      }
+    },
+    _checkMore (data) {
+      const song = data.song
+      if (!song.list.length || (song.curnum + song.curpage * PERPAGE) > song.totalnum) {
+        this.hasMore = false
+      }
+    },
     _formatReslut (data) {
       let ret = []
       if (data.zhida && data.zhida.singerid) {
@@ -71,14 +125,30 @@ export default {
       return ret
     },
     _normallizeSongs (list) {
+      // console.log(list)
       let ret = []
       list.forEach(musicData => {
         if (musicData.songid && musicData.albumid) {
-          ret.push(createSong(musicData))
+          // console.log(musicData)
+          getSongVkey(musicData.songmid).then(res => {
+            if (res.code === ERR_OK) {
+              let more = res.data.items[0]
+              let obj = Object.assign(musicData, more)
+              ret.push(createSong(obj))
+            }
+          })
+          // ret.push(createSong(musicData))
         }
       })
+      // console.log(ret)
       return ret
-    }
+    },
+    ...mapMutations({
+      setSinger: 'SET_SINGER'
+    }),
+    ...mapActions([
+      'insertSong'
+    ])
   },
   watch: {
     query () {
