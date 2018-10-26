@@ -75,7 +75,7 @@ export default {
         if (res.code === ERR_OK) {
           // console.log(res.data)
           this.result = this._formatReslut(res.data)
-          console.log(this.result)
+          // console.log(this.result)
           this._checkMore(res.data)
         }
       })
@@ -105,7 +105,14 @@ export default {
         })
         this.setSinger(singer)
       } else {
-        this.insertSong(item)
+        getSongVkey(item.mid).then(res => {
+          if (res.code === ERR_OK) {
+            let more = res.data.items[0]
+            let obj = Object.assign(item, more)
+            let song = createSong(obj)
+            this.insertSong(song)
+          }
+        })
       }
     },
     _checkMore (data) {
@@ -130,14 +137,8 @@ export default {
       list.forEach(musicData => {
         if (musicData.songid && musicData.albumid) {
           // console.log(musicData)
-          getSongVkey(musicData.songmid).then(res => {
-            if (res.code === ERR_OK) {
-              let more = res.data.items[0]
-              let obj = Object.assign(musicData, more)
-              ret.push(createSong(obj))
-            }
-          })
-          // ret.push(createSong(musicData))
+
+          ret.push(createSong(musicData))
         }
       })
       // console.log(ret)

@@ -49,18 +49,21 @@ export default class Song {
 }
 
 export function createSong (musicData) {
+  let image = musicData.albummid
+    ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
+      musicData.albummid
+    }.jpg?max_age=2592000`
+    : musicData.image
   return new Song({
-    id: musicData.songid,
+    id: musicData.songid || musicData.id,
     mid: musicData.songmid,
     singer: filterSinger(musicData.singer),
     name: musicData.songname,
     // 专辑
-    album: musicData.albumname,
+    album: musicData.albumname || musicData.album,
     // 歌曲时长
-    duration: musicData.interval,
-    image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
-      musicData.albummid
-    }.jpg?max_age=2592000`,
+    duration: musicData.interval || musicData.duration,
+    image: image,
     url: `http://dl.stream.qqmusic.qq.com/${musicData.filename}?vkey=${
       musicData.vkey
     }&guid=${guidNum}&uin=0&fromtag=66`
@@ -69,7 +72,7 @@ export function createSong (musicData) {
 
 export function filterSinger (singer) {
   let ret = []
-  if (!singer) {
+  if (!singer || typeof singer === 'string') {
     return ''
   }
   singer.forEach(s => {
